@@ -4,10 +4,10 @@ import { SqlServerConnectionOptions } from 'typeorm/driver/sqlserver/SqlServerCo
 
 const options: SqlServerConnectionOptions = {
   type: 'mssql',
-  host: '127.0.0.1',
+  host: 'localhost',
   port: 1433,
-  username: 'dev',
-  password: 'interiordesign',
+  username: 'urbe',
+  password: 'malditaurbe',
   database: 'interiordesign',
   entities: [__dirname + '/**/*.entity{.ts,.js}'],
   synchronize: true,
@@ -15,7 +15,8 @@ const options: SqlServerConnectionOptions = {
   migrationsTableName: '__MigrationHistory',
   migrations: ['src/server/common/data/migrations/**{.js,.ts}'],
   options: {
-    encrypt: true,
+    encrypt: false,
+    trustServerCertificate: false,
   },
 };
 

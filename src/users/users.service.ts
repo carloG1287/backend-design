@@ -1,49 +1,67 @@
+import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
+import { User } from './entities/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+  ) {}
+
+  async findAll(): Promise<User[]> {
+    return await this.userRepository.find();
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findById(id: number): Promise<User> {
+    return await this.userRepository.findOne({ where: { id } });
   }
 
-  findOne(username: string) {
-    return `This action returns a #${username} user`;
+  async findOne(username: string): Promise<User> {
+    return await this.userRepository.findOne({ where: { username } });
   }
 
-  findOneByEmail(email: string) {
-    return {
-      id: 1,
-      username: 'johnDoe',
-      email: email,
-      password_digest: '',
-    };
+  async findOneByEmail(email: string): Promise<User> {
+    return await this.userRepository.findOne({ where: { email } });
   }
 
-  findOneByEmailOrUsername(value: string) {
-    return {
-      id: 1,
-      username: 'johnDoe',
-      email: value,
-      password_digest: '',
-    };
+  async findOneByEmailOrUsername(value: string): Promise<User> {
+    return await this.userRepository.findOne({
+      where: { email: value, username: value },
+    });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async searchQuestion(value: string): Promise<string> {
+    return (await this.findOneByEmailOrUsername(value)).security_question;
   }
 
-  changePassword(id: number, changePasswordDto: ChangePasswordDto) {
-    return `This action changes the password of a #${id} user`;
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    return await this.userRepository.save(createUserDto);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+    await this.userRepository.update(id, updateUserDto);
+    return this.findById(id);
+  }
+
+  async updateByUsername(
+    username: string,
+    updateUserDto: UpdateUserDto,
+  ): Promise<User> {
+    await this.userRepository.update(username, updateUserDto);
+    return this.findOneByEmail(username);
+  }
+
+  async changePassword(username: string, changePasswordDto: ChangePasswordDto) {
+    await this.updateByUsername(username, changePasswordDto);
+    return this.findOneByEmail(username);
+  }
+
+  async remove(username: string): Promise<void> {
+    await this.userRepository.delete(username);
   }
 }
