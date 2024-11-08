@@ -29,7 +29,7 @@ export class UsersController {
   @Get(':_username')
   @UseGuards(AuthGuard)
   findOne(@Param('_username') username: string) {
-    return this.usersService.findOne(username);
+    return this.usersService.findOneByUsername(username); // Cambiado a findOneByUsername
   }
 
   // GET /users/question/?_username={username}

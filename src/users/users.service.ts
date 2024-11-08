@@ -13,6 +13,16 @@ export class UsersService {
     private userRepository: Repository<User>,
   ) {}
 
+  // Método que busca un usuario por email o nombre de usuario
+  async findOneByEmailOrUsername(email?: string, username?: string): Promise<User | undefined> {
+    if (email) {
+      return this.findOneByEmail(email);
+    } else if (username) {
+      return this.findOneByUsername(username);
+    }
+    return undefined;
+  }
+
   async findAll(): Promise<User[]> {
     return await this.userRepository.find();
   }
@@ -21,7 +31,8 @@ export class UsersService {
     return await this.userRepository.findOne({ where: { id } });
   }
 
-  async findOne(username: string): Promise<User> {
+  // Renombrado para claridad
+  async findOneByUsername(username: string): Promise<User> {
     return await this.userRepository.findOne({ where: { username } });
   }
 
@@ -29,14 +40,9 @@ export class UsersService {
     return await this.userRepository.findOne({ where: { email } });
   }
 
-  async findOneByEmailOrUsername(value: string): Promise<User> {
-    return await this.userRepository.findOne({
-      where: { email: value, username: value },
-    });
-  }
-
   async searchQuestion(value: string): Promise<string> {
-    return (await this.findOneByEmailOrUsername(value)).security_question;
+    const user = await this.findOneByEmailOrUsername(value);
+    return user?.security_question || '';
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -52,16 +58,16 @@ export class UsersService {
     username: string,
     updateUserDto: UpdateUserDto,
   ): Promise<User> {
-    await this.userRepository.update(username, updateUserDto);
-    return this.findOneByEmail(username);
+    await this.userRepository.update({ username }, updateUserDto);
+    return this.findOneByUsername(username);
   }
 
   async changePassword(username: string, changePasswordDto: ChangePasswordDto) {
     await this.updateByUsername(username, changePasswordDto);
-    return this.findOneByEmail(username);
+    return this.findOneByUsername(username);
   }
 
   async remove(username: string): Promise<void> {
-    await this.userRepository.delete(username);
+    await this.userRepository.delete({ username });
   }
 }

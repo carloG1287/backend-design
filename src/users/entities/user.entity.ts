@@ -1,7 +1,14 @@
-import { Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
+@Entity() // Agrega este decorador para que TypeORM la reconozca como entidad
 export class User {
-  @Column({ primary: true, generated: true })
+  @PrimaryGeneratedColumn() // Usa @PrimaryGeneratedColumn para la clave primaria generada automáticamente
   id: number;
 
   @Column({ length: 500 })
@@ -22,9 +29,9 @@ export class User {
   @Column({ length: 500 })
   security_answer: string;
 
-  @CreateDateColumn({ generated: true })
+  @CreateDateColumn()
   created_at: Date;
 
-  @UpdateDateColumn({ generated: true })
+  @UpdateDateColumn()
   updated_at: Date;
 }
