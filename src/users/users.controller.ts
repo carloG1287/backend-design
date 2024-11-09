@@ -44,11 +44,10 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
-  // PUT /users/change_password
-  @Put('change_password')
+  @Put('change_password/:_username')
   changePassword(
     @Param('_username') username: string,
-    changePasswordDto: ChangePasswordDto,
+    @Body() changePasswordDto: ChangePasswordDto,
   ) {
     return this.usersService.changePassword(username, changePasswordDto);
   }

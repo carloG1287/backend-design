@@ -14,10 +14,12 @@ export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
-    // Agrega este log para ver el token
+    
+    // Log para verificar el token
     console.log('Token recibido en AuthGuard:', token);
+    
     if (!token) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Token not found');
     }
 
     try {
@@ -26,14 +28,17 @@ export class AuthGuard implements CanActivate {
       });
       request.user = payload;
     } catch (error) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Invalid token');
     }
 
     return true;
   }
 
-  private extractTokenFromHeader(request: Request) {
-    const [type, token] = request.headers.get('Authorization').split(' ') ?? [];
+  private extractTokenFromHeader(request: any) {
+    const authHeader = request.headers['authorization'] || request.headers['Authorization'];
+    if (!authHeader) return undefined;
+
+    const [type, token] = authHeader.split(' ');
     return type === 'Bearer' ? token : undefined;
   }
 }
