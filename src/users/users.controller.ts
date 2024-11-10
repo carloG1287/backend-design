@@ -7,6 +7,7 @@ import {
   Delete,
   Put,
   UseGuards,
+  NotFoundException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -32,10 +33,17 @@ export class UsersController {
     return this.usersService.findOneByUsername(username); // Cambiado a findOneByUsername
   }
 
-  // GET /users/question/?_username={username}
   @Get('question/:_username')
-  getQuestion(@Param('_username') username: string) {
-    return { question: this.usersService.searchQuestion(username) };
+  async getQuestion(@Param('_username') username: string) {
+    const user = await this.usersService.searchQuestion(username);
+
+    // Extrae la propiedad de seguridad si existe
+    if (!user || !user.security_question) {
+      throw new NotFoundException('Pregunta de seguridad no encontrada');
+    }
+
+    // Devuelve la pregunta de seguridad como un objeto
+    return { question: user.security_question };
   }
 
   // POST /users

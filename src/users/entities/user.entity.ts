@@ -6,9 +6,9 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity() // Agrega este decorador para que TypeORM la reconozca como entidad
+@Entity({ name: 'user' }) // Nombre exacto de la tabla como aparece en la base de datos
 export class User {
-  @PrimaryGeneratedColumn() // Usa @PrimaryGeneratedColumn para la clave primaria generada automáticamente
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ length: 500 })
@@ -35,3 +35,4 @@ export class User {
   @UpdateDateColumn()
   updated_at: Date;
 }
+

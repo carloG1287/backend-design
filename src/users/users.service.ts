@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Repository } from 'typeorm';
 import {
   BadRequestException,
@@ -18,18 +19,18 @@ export class UsersService {
     private userRepository: Repository<User>,
   ) {}
 
-  // Método que busca un usuario por email o nombre de usuario
   async findOneByEmailOrUsername(
     email?: string,
     username?: string,
   ): Promise<User | undefined> {
     if (email) {
-      return this.findOneByEmail(email);
+      return await this.findOneByEmail(email);
     } else if (username) {
-      return this.findOneByUsername(username);
+      return await this.findOneByUsername(username);
+    } else {
+      throw new BadRequestException('Email or username must be provided');
     }
-    return undefined;
-  }
+  }  
 
   async findAll(): Promise<User[]> {
     return await this.userRepository.find();
@@ -41,17 +42,30 @@ export class UsersService {
 
   // Renombrado para claridad
   async findOneByUsername(username: string): Promise<User> {
-    return await this.userRepository.findOne({ where: { username } });
+    return await this.userRepository.findOne({
+      where: {
+        username: username.toLowerCase(),
+      },
+    });
   }
+  
 
   async findOneByEmail(email: string): Promise<User> {
     return await this.userRepository.findOne({ where: { email } });
   }
 
-  async searchQuestion(value: string): Promise<string> {
-    const user = await this.findOneByEmailOrUsername(value);
-    return user?.security_question || '';
+  async searchQuestion(value: string): Promise<User | null> {
+    console.log("Valor de búsqueda recibido:", value);
+    const user = await this.findOneByEmailOrUsername(undefined, value);
+  
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+  
+    console.log("Usuario encontrado:", user);
+    return user;  // Devuelve el objeto completo del usuario
   }
+  
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     return await this.userRepository.save(createUserDto);
