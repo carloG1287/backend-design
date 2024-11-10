@@ -1,5 +1,9 @@
 import { Repository } from 'typeorm';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -72,12 +76,12 @@ export class UsersService {
 
     // Verifica que el usuario exista
     if (!user) {
-      throw new Error('User not found');
+      throw new BadRequestException('User not found');
     }
 
     // Valida la respuesta de seguridad
     if (user.security_answer !== changePasswordDto.security_answer) {
-      throw new Error('Incorrect security answer');
+      throw new BadRequestException('Incorrect security answer');
     }
 
     // Verifica que la nueva contraseña no sea igual a la anterior
@@ -86,7 +90,9 @@ export class UsersService {
       user.password_digest,
     );
     if (isSamePassword) {
-      throw new Error('New password cannot be the same as the old password');
+      throw new BadRequestException(
+        'La nueva contraseña no puede ser igual a la anterior',
+      );
     }
 
     // Hashea la nueva contraseña
